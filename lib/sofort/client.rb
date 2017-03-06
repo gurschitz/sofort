@@ -8,11 +8,11 @@ module Sofort
     headers 'Accept' => 'application/xml; charset=UTF-8'
     headers 'Content-Type' => 'application/xml; charset=UTF-8'
 
-    def initialize
+    def initialize(user_id: Sofort.user_id, api_key: Sofort.api_key)
       @options = {}
       @options[:basic_auth] = {
-        username: Sofort.user_id,
-        password: Sofort.api_key
+        username: user_id,
+        password: api_key
       }
       @options[:headers] = {
         'Accept' => 'application/xml',
@@ -20,9 +20,9 @@ module Sofort
       }
     end
 
-    def pay(amount, name, *args)
+    def pay(amount, *args)
       opts = args.extract_options!.symbolize_keys!
-      xml = pay_xml(amount, name, opts)
+      xml = pay_xml(amount, opts)
       results = self.class.post(Sofort.base_url,  @options.merge(body: xml))
       results['new_transaction'].present? ? results['new_transaction'] : results
     end
@@ -46,7 +46,7 @@ module Sofort
       eos
     end
 
-    def pay_xml(amount, name, opts)
+    def pay_xml(amount, opts)
       reason = opts[:reason] || Sofort.reason
       currency_code = opts[:currency_code] || Sofort.currency_code
       country_code = opts[:country_code] ||  Sofort.country_code
@@ -59,7 +59,7 @@ module Sofort
       user_variable = opts[:user_variable] ||  Sofort.user_variable
       project_id = opts[:project_id] ||  Sofort.project_id
 
-      {
+      xml_options = {
         amount: amount,
         currency_code: currency_code,
         language_code: language_code,
@@ -67,7 +67,6 @@ module Sofort
           reason: reason
         },
         sender: {
-          holder: name,
           country_code: country_code
         },
         email_customer: email_customer,
@@ -84,8 +83,17 @@ module Sofort
         abort_url: abort_url,
         su: '',
         project_id: project_id
-      }.to_xml(root: 'multipay', skip_types: true, dasherize: false)
+      }
 
+      xml_options[:timeout] = opts[:timeout] unless opts[:timeout].nil?
+      xml_options[:sender][:holder] = opts[:holder] unless opts[:holder].nil?
+
+      xml_options.to_xml(root: 'multipay', skip_types: true, dasherize: false)
+
+    end
+
+    def get_sofort_ip
+      @sofort_ip ||= HTTParty.get(Sofort.ip_url).body
     end
   end
 end

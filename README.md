@@ -27,6 +27,10 @@ Or install it yourself as:
   ```ruby
   client = Sofort::Client.new
   ```
+  You can optionally pass the user_id and the api_key when initializing the client
+  ```ruby`
+  client = Sofort::Client.new(user_id: 'abc', api_key: 'xyz')
+  ``
 ### Example of pay
  you can set more attributes, please look at config/initializers/sofort.rb
   ```ruby

@@ -5,7 +5,7 @@ require 'active_support/core_ext/hash/conversions'
 require 'active_support/core_ext/hash/keys'
 
 module Sofort
-  VALUES =  [:user_id, :api_key, :base_url, :abort_url,
+  VALUES =  [:user_id, :api_key, :base_url, :ip_url, :abort_url,
             :success_url, :notification_url, :email_customer,
             :notification_email, :project_id, :country_code,
             :currency_code, :reason, :language_code,:user_variable]
@@ -30,6 +30,7 @@ module Sofort
   @@api_key = 'api_key'
 
   @@base_url = "https://api.sofort.com/api/xml"
+  @@ip_url = "https://www.sofort.com/payment/status/ipList"
   @@abort_url = 'abort_url'
   @@success_url = 'success_url'
   @@notification_url = 'notification_url'
